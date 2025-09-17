@@ -1,5 +1,9 @@
 package org.example.expert.domain.todo.controller;
 
+import lombok.With;
+import org.example.expert.config.JwtSecurityProperties;
+import org.example.expert.config.JwtUtil;
+import org.example.expert.config.WithMockAuthUser;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
@@ -9,6 +13,8 @@ import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -22,7 +28,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TodoController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class TodoControllerTest {
+
+    @MockBean
+    JwtUtil jwtUtil;
+
+    @MockBean
+    JwtSecurityProperties jwtSecurityProperties;
 
     @Autowired
     private MockMvc mockMvc;
