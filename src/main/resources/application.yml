@@ -22,3 +22,7 @@ jwt:
     whiteList:
       - /auth/signup
       - /auth/signin
+
+logging:
+  level.org.hibernate:
+    orm.jdbc.bind: TRACE

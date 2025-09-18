@@ -3,10 +3,12 @@ package org.example.expert.domain.todo.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.expert.domain.common.annotation.Auth;
 import org.example.expert.domain.common.dto.AuthUser;
+import org.example.expert.domain.todo.dto.SearchTodoCond;
 import org.example.expert.domain.todo.dto.TodoSearchCond;
+import org.example.expert.domain.todo.dto.request.SearchTodoRequest;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
+import org.example.expert.domain.todo.dto.response.SearchTodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
 import org.example.expert.domain.todo.service.TodoService;
@@ -52,6 +54,12 @@ public class TodoController {
     @GetMapping("/todos/{todoId}")
     public ResponseEntity<TodoResponse> getTodo(@PathVariable long todoId) {
         return ResponseEntity.ok(todoService.getTodo(todoId));
+    }
+
+    @GetMapping("/todos/search")
+    public ResponseEntity<Page<SearchTodoResponse>> searchTodos(@Valid @ModelAttribute SearchTodoRequest request) {
+        SearchTodoCond searchTodoCond = SearchTodoCond.from(request);
+        return ResponseEntity.ok(todoService.searchTodos(searchTodoCond));
     }
 
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
