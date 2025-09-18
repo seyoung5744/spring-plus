@@ -24,5 +24,13 @@ jwt:
       - /auth/signin
 
 logging:
-  level.org.hibernate:
-    orm.jdbc.bind: TRACE
+  level:
+    org:
+      hibernate:
+        orm.jdbc.bind: TRACE
+        resource.transaction: DEBUG
+      springframework:
+        transaction:
+          interceptor: TRACE
+        jdbc.datasource.DataSourceTransactionManager: DEBUG
+        orm.jpa.JpaTransactionManager: DEBUG
