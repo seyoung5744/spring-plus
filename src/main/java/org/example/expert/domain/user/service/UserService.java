@@ -28,7 +28,9 @@ public class UserService {
 
     public UserResponse getUser(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new InvalidRequestException("User not found"));
-        return new UserResponse(user.getId(), user.getEmail());
+        ProfileImage profileImage = profileImageRepository.findFirstByUserOrderByCreatedAtDesc(user).orElse(null);
+        return new UserResponse(user.getId(), user.getEmail(), user.getNickname(),
+                profileImage != null ? profileImage.getUrl() : null);
     }
 
     @Transactional
