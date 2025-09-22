@@ -10,7 +10,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
@@ -47,7 +47,11 @@ logging:
         orm.jdbc.bind: TRACE
         resource.transaction: DEBUG
       springframework:
+        jdbc:
+          core: # Batch Insert JdbcTemplate Query log
+            JdbcTemplate: DEBUG
+            StatementCreatorUtils: TRACE
         transaction:
           interceptor: TRACE
-        jdbc.datasource.DataSourceTransactionManager: DEBUG
         orm.jpa.JpaTransactionManager: DEBUG
+        jdbc.datasource.DataSourceTransactionManager: DEBUG
