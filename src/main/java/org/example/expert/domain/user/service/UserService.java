@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -70,6 +72,12 @@ public class UserService {
                             .build()
             );
         }
+    }
+
+    public List<UserResponse> searchByNickname(String nickname) {
+        return userRepository.findAllByNickname(nickname).stream()
+                .map(user -> new UserResponse(user.getId(), user.getEmail(), user.getNickname(), null))
+                .toList();
     }
 
     private static void validateNewPassword(UserChangePasswordRequest userChangePasswordRequest) {

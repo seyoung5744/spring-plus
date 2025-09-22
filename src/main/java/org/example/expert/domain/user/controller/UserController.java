@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -29,5 +31,12 @@ public class UserController {
     @PutMapping("/users/profile")
     public void changeProfile(@AuthenticationPrincipal AuthUser authUser, @RequestParam MultipartFile profile) {
         userService.changeProfile(authUser.getId(), profile);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserResponse>> searchByNickname(
+            @RequestParam String nickname
+    ) {
+        return ResponseEntity.ok(userService.searchByNickname(nickname));
     }
 }
