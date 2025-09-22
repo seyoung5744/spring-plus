@@ -2,13 +2,19 @@ package org.example.expert.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.common.exception.InvalidRequestException;
+import org.example.expert.domain.file.dto.FileMetadataDto;
+import org.example.expert.domain.file.type.FileDirectoryType;
+import org.example.expert.domain.file.uploder.FileUploader;
 import org.example.expert.domain.user.dto.request.UserChangePasswordRequest;
 import org.example.expert.domain.user.dto.response.UserResponse;
+import org.example.expert.domain.user.entity.ProfileImage;
 import org.example.expert.domain.user.entity.User;
+import org.example.expert.domain.user.repository.ProfileImageRepository;
 import org.example.expert.domain.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final FileUploader fileUploader;
+    private final ProfileImageRepository profileImageRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserResponse getUser(long userId) {
@@ -39,6 +47,27 @@ public class UserService {
         }
 
         user.changePassword(passwordEncoder.encode(userChangePasswordRequest.getNewPassword()));
+    }
+
+    @Transactional
+    public void changeProfile(Long userId, MultipartFile profile) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidRequestException("User not found"));
+
+        if (profile != null && !profile.isEmpty()) {
+            FileMetadataDto fileMetadataDto = fileUploader.upload(profile, FileDirectoryType.PROFILE);
+            profileImageRepository.save(
+                    ProfileImage.builder()
+                            .user(user)
+                            .url(fileMetadataDto.url())
+                            .originalFileName(fileMetadataDto.originalFileName())
+                            .storedFileName(fileMetadataDto.storedFileName())
+                            .contentType(fileMetadataDto.contentType())
+                            .ext(fileMetadataDto.extension())
+                            .size(fileMetadataDto.fileSize())
+                            .build()
+            );
+        }
     }
 
     private static void validateNewPassword(UserChangePasswordRequest userChangePasswordRequest) {
