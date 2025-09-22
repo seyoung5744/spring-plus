@@ -8,12 +8,18 @@ import org.example.expert.domain.auth.dto.response.SigninResponse;
 import org.example.expert.domain.auth.dto.response.SignupResponse;
 import org.example.expert.domain.auth.exception.AuthException;
 import org.example.expert.domain.common.exception.InvalidRequestException;
+import org.example.expert.domain.file.dto.FileMetadataDto;
+import org.example.expert.domain.file.type.FileDirectoryType;
+import org.example.expert.domain.file.uploder.FileUploader;
+import org.example.expert.domain.user.entity.ProfileImage;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
+import org.example.expert.domain.user.repository.ProfileImageRepository;
 import org.example.expert.domain.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -21,11 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final ProfileImageRepository profileImageRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final FileUploader fileUploader;
 
     @Transactional
-    public SignupResponse signup(SignupRequest signupRequest) {
+    public SignupResponse signup(SignupRequest signupRequest, MultipartFile profile) {
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             throw new InvalidRequestException("이미 존재하는 이메일입니다.");
@@ -43,6 +52,21 @@ public class AuthService {
         );
         User savedUser = userRepository.save(newUser);
 
+        if (profile != null && !profile.isEmpty()) {
+            FileMetadataDto fileMetadataDto = fileUploader.upload(profile, FileDirectoryType.PROFILE);
+
+            profileImageRepository.save(
+                    ProfileImage.builder()
+                            .user(savedUser)
+                            .url(fileMetadataDto.url())
+                            .originalFileName(fileMetadataDto.originalFileName())
+                            .storedFileName(fileMetadataDto.storedFileName())
+                            .contentType(fileMetadataDto.contentType())
+                            .ext(fileMetadataDto.extension())
+                            .size(fileMetadataDto.fileSize())
+                            .build()
+            );
+        }
         String bearerToken = jwtUtil.createToken(savedUser.getId(), savedUser.getEmail(), savedUser.getNickname(), userRole);
 
         return new SignupResponse(bearerToken);

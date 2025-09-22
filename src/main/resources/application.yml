@@ -1,36 +1,3 @@
 spring:
-  application:
-    name: Expert
-  config:
-    import: optional:file:.env[.properties]
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-
-jwt:
-  secret:
-    key: ${JWT_SECRET_KEY}
-    whiteList:
-      - /auth/signup
-      - /auth/signin
-      - /actuator/**
-logging:
-  level:
-    org:
-      hibernate:
-        orm.jdbc.bind: TRACE
-        resource.transaction: DEBUG
-      springframework:
-        transaction:
-          interceptor: TRACE
-        jdbc.datasource.DataSourceTransactionManager: DEBUG
-        orm.jpa.JpaTransactionManager: DEBUG
+  profiles:
+    active: local
