@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: Expert
+  config:
+    import: optional:file:.env.local[.properties]
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+
+profile:
+  location: ./image/
+
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+    whiteList:
+      - /auth/signup
+      - /auth/signin
+      - /actuator/**
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    s3:
+      bucket: ${S3_BUCKET_NAME}
+    region:
+      static: ${AWS_REGION} # bucket이 위치한 AWS 리전
+    stack:
+      auto: false  # 자동 스택 생성 기능 사용여부를 설정한다. (자동 스택 생성: 애플리케이션이 실행, 배포될 때 인프라 리소스를 자동으로 생성하고 설정하는 것)
+
+logging:
+  level:
+    org:
+      apache.coyote.http11: DEBUG # multipart 확인용
+      hibernate:
+        orm.jdbc.bind: TRACE
+        resource.transaction: DEBUG
+      springframework:
+        transaction:
+          interceptor: TRACE
+        jdbc.datasource.DataSourceTransactionManager: DEBUG
+        orm.jpa.JpaTransactionManager: DEBUG
