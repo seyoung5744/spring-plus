@@ -17,6 +17,7 @@ import org.example.expert.domain.todo.repository.dto.TodoSummaryProjection;
 import org.example.expert.domain.user.entity.QUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -54,13 +55,17 @@ public class TodoQueryRepositoryImpl implements TodoQueryRepository {
         QComment comment = QComment.comment;
         QManager manager = QManager.manager;
 
-        // title or nickn
-        List<Long> todoIds = jpaQueryFactory.selectDistinct(manager.todo.id)
+        // 담당자 nickname 이 검색 조건에 해당하는 todo 리스트 조회
+        List<Todo> todos = jpaQueryFactory.selectDistinct(manager.todo)
                 .from(manager)
                 .where(
-                        titleLike(todo, cond.title()),
+                        titleLike(manager.todo, cond.title()),
                         managerNicknameLike(manager, cond.nickname())
                 ).fetch();
+
+        for (Todo todo1 : todos) {
+            log.info("이름 {}", todo1.getUser().getNickname());
+        }
         List<TodoSummaryProjection> content = jpaQueryFactory.select(
                         new QTodoSummaryProjection(
                                 todo.id,
@@ -77,7 +82,7 @@ public class TodoQueryRepositoryImpl implements TodoQueryRepository {
                 .where(
                         titleLike(todo, cond.title()),
                         betweenDate(todo, cond.startDateTime(), cond.endDateTime()),
-                        todo.id.in(todoIds)
+                        todoIn(todo, todos)
                 )
                 .orderBy(todo.createdAt.desc())
                 .offset(cond.pageable().getOffset())
@@ -89,10 +94,14 @@ public class TodoQueryRepositoryImpl implements TodoQueryRepository {
                 .where(
                         titleLike(todo, cond.title()),
                         betweenDate(todo, cond.startDateTime(), cond.endDateTime()),
-                        todo.id.in(todoIds)
+                        todoIn(todo, todos)
                 );
 
         return PageableExecutionUtils.getPage(content, cond.pageable(), countQuery::fetchOne);
+    }
+
+    private BooleanExpression todoIn(QTodo todo, List<Todo> todos) {
+        return !ObjectUtils.isEmpty(todos) ? todo.in(todos) : null;
     }
 
     private BooleanExpression titleLike(QTodo todo, String title) {
