@@ -74,7 +74,12 @@ public class UserService {
         }
     }
 
-    public List<UserResponse> searchByNickname(String nickname) {
+    public List<UserResponse> searchByNickname(String nickname, boolean ignoreIdx) {
+        if (ignoreIdx) {
+            return userRepository.findAllByNicknameIgnoreIndex(nickname).stream()
+                    .map(user -> new UserResponse(user.getId(), user.getEmail(), user.getNickname(), null))
+                    .toList();
+        }
         return userRepository.findAllByNickname(nickname).stream()
                 .map(user -> new UserResponse(user.getId(), user.getEmail(), user.getNickname(), null))
                 .toList();

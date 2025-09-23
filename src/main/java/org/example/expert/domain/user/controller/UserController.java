@@ -35,8 +35,10 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<UserResponse>> searchByNickname(
-            @RequestParam String nickname
+            @RequestParam String nickname,
+            @RequestParam(defaultValue = "false") boolean ignoreIdx
     ) {
-        return ResponseEntity.ok(userService.searchByNickname(nickname));
+        System.out.println(ignoreIdx);
+        return ResponseEntity.ok(userService.searchByNickname(nickname, ignoreIdx));
     }
 }
